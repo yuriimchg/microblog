@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>
+    Sign In into account!
+  </h1>
+  <form action="" method="post" novalidate>
+    <!-- Creates hidden field containing token to prevent
+    the form being under CSRF  -->
+    {{ form.hidden_tag() }}
+    <!-- Go through login and password   -->
+    <p>
+      {{ form.username.label }}
+      {% for error in form.username.errors %}
+        <span style="color: red;"> [{{ error }}.]</span>
+      {% endfor %}
+
+      <br>
+      {{ form.username(size=32) }}
+    </p>
+    <p>
+      {{ form.password.label }}
+      {% for error in form.password.errors %}
+        <span style="color: red;"> [{ error }]</span>
+      {% endfor %}
+
+      <br>
+      {{ form.password(size=32) }}
+    </p>
+    <p>
+      {{ form.remember_me() }}
+      {{ form.remember_me.label }}
+    </p>
+    <p>
+      {{ form.submit() }}
+    </p>
+  </form>
+{% endblock %}

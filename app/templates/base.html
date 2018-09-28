@@ -12,6 +12,22 @@
   {% endif %}
 </head>
 <body>
+  <div>
+    Microblog:
+    <a href="{{ url_for('/index') }}"> Home</a>
+    <a href="{{ url_for('/login') }}"> Sign In</a>
+  </div>
+  <!--  Markup below is for displaying login messages --->
+  <hr>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+        {% for message in messages %}
+          <li> {{ message }}</li>
+        {% endfor %}
+      </li>
+  {% endif %}
+  {% endwith %}
   <!-- This block would be replaced with local extends -->
   {% block content %}{% endblock %}
 </body>
