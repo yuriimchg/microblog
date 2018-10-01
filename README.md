@@ -9,6 +9,6 @@ Studying Flask with Miguel Brinberg's tutorial "The Flask Mega-Tutorial"
 
 ` cd microblog `
 
-` export FLASK_APP=`pwd``
+``` export FLASK_APP=`pwd` ```
 
 ` flask run `
