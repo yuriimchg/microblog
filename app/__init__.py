@@ -6,12 +6,18 @@ from flask_login import LoginManager
 
 # Create an instanсe of a flask application
 app = Flask(__name__)
+
 # Initialize Flask-Login instance
 login = LoginManager(app)
+# Define endpoint to log in into system
+login.login_view = 'login'
+
 # Create an instance of app configurations
 app.config.from_object(Config)
+
 # Create an instance of the database
 db = SQLAlchemy(app)
+
 # Create an instance of the database migration
 migrate = Migrate(app,db)
 

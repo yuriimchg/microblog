@@ -1,9 +1,18 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from app import db, login
+# login components: get_id, is_auth, is_active, is_anon
+from flask_login import UserMixin
+# generate avatar
+from hashlib import md5
+
+# Load user
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
 
 # inherited from db.Model - basic class for all Flask models
-class User(db.Model):
+class User(UserMixin, db.Model):
     # Id column
     id = db.Column(db.Integer, primary_key = True)
     # Username column
@@ -15,6 +24,10 @@ class User(db.Model):
     password_hash = db.Column(db.String(128))
     # Posts by user
     posts = db.relationship('Post', backref='author', lazy='dynamic')
+    # Information about user
+    about_me = db.Column(db.String(640))
+    # Timestamp, when the user last seen
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -33,3 +46,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return f'Post {self.body}'
+
+class User(UserMixin, db.Model):
+
+    def avatar(self, size):
+        #
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
