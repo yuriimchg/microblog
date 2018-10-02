@@ -1,20 +1,25 @@
 # Rendering the webpage
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, EditProfileForm
 from app.models import User
 # flash is to show messages to the user
 # redirect is to redirect user from login page
 # url_for is to create internal links painless
 from flask import flash, redirect, url_for, render_template, request
 from werkzeug.urls import url_parse
+from datetime import datetime
+
+@app.before_request
+def before_request():
+    if current_user.is_authenticated:
+        current_user.last_seen = datetime.utcnow()
+        db.session.commit()
 
 @app.route('/')
 @app.route('/index')
 @login_required
 def index():
-    # Create pseudo user Ivan
-    user = {'username':'Йван'}
     # Render title and username into webpage
     posts = [
         {
@@ -106,5 +111,25 @@ def user(username):
             {'author':user, 'body':'Test post #1'},
             {'author':user, 'body':'Test post #2'}
         ]
-
     return render_template('user.html', user=user, posts=posts)
+
+@app.route('/user/edit_profile', methods=['GET','POST'])
+@login_required
+def edit_profile():
+    # Get the form to change the profile information
+    form = EditProfileForm()
+    # Change profile information on submit
+    if form.validate_on_submit():
+        # Change nickname
+        current_user.username = form.username.data
+        # Change information about user
+        current_user.about_me = form.about_me.data
+        # Commit changes to datebase
+        db.session.commit()
+        # Print informational message
+        flash('Your changes have been saved.')
+        return redirect(url_for('user/<username>'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+    return render_template('edit_profile.html', title='Edit Profile', form=form)

@@ -1,9 +1,9 @@
 # FlaskForm is responsible for simple performing of forms
 from flask_wtf import FlaskForm
 # wtforms contains form templates
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 # validators prevent from submitting empty forms
-from wtforms.validators import DataRequired, Email, ValidationError, EqualTo
+from wtforms.validators import DataRequired, Email, ValidationError, EqualTo, Length
 from app.models import User
 
 class LoginForm(FlaskForm):
@@ -32,3 +32,8 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError("This e-mail is already used. Please, choose another one")
+
+class EditProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    about_me = TextAreaField('About me', validators=[Length(min=0, max=640)])
+    submit = SubmitField('Submit')
