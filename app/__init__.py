@@ -59,7 +59,7 @@ if not app.debug:
 
     # Provide string formatting for the single log
     file_handler.setFormatter(logging.Formatter(
-    '%(actime)s  %(levelname)s:  %(message)s [in %(pathname)s:%(lineno)d]'))
+    '%(asctime)s  %(levelname)s:  %(message)s [in %(pathname)s:%(lineno)d]'))
     # Set level of the logging to INFO
     file_handler.setLevel(logging.INFO)
     app.logger.addHandler(file_handler)
