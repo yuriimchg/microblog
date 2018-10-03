@@ -1,8 +1,8 @@
 # Rendering the webpage
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, PostForm
+from app.models import User, Post
 # flash is to show messages to the user
 # redirect is to redirect user from login page
 # url_for is to create internal links painless
@@ -16,29 +16,30 @@ def before_request():
         current_user.last_seen = datetime.utcnow()
         db.session.commit()
 
-@app.route('/')
-@app.route('/index')
+@app.route('/', methods=["GET","POST"])
+@app.route('/index', methods=["GET","POST"])
 @login_required
 def index():
-    # Render title and username into webpage
-    posts = [
-        {
-            'author' : {'username': 'Cow'},
-            'body' : 'Moo-oo-oo-oo-u!'
-        },
-        {
-            'author' : {'username' : 'Serj Tankian'},
-            'body' : 'Eating seeds is the best time activity'
-        },
-        {
-            'author' : {'username' : 'Jason Stathem'},
-            'body' : 'I posted my first quotation to MDK when I was 16'
-        }
-    ]
-    return render_template('index.html',
-                            title='Home',
-                            posts=posts)
-
+    # Get the form
+    form = PostForm()
+    # On submitting the form...
+    if form.validate_on_submit():
+        # Add the new post
+        post = Post(body=form.post.data, author=current_user)
+        # Add the new post to the database
+        db.session.add(post)
+        # Commit changes to the database
+        db.session.commit()
+        flash('Well Done! You have posted it!')
+        return redirect(url_for('index'))
+    # List the following posts
+    posts = current_user.followed_posts().all()
+    page = request.args.get('page', 1, type=int)
+    # View the posts
+    posts = current_user.followed_posts().paginate(
+            page, app.config['POSTS_PER_PAGE'], False)
+    return render_template('index.html', title='Home', form=form,
+                           posts=posts.items)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -100,6 +101,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html', title='Registration', form=form)
 
+
 # User home page
 @app.route('/user/<username>')
 @login_required
@@ -128,8 +130,69 @@ def edit_profile():
         db.session.commit()
         # Print informational message
         flash('Your changes have been saved.')
-        return redirect(url_for('user/<username>'))
+        return redirect(url_for('index'))
+    # On loading the form
     elif request.method == 'GET':
+        # Show username in the string field
         form.username.data = current_user.username
+        # Show data about user in the text area field
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+@app.route('/follow/<username>')
+@login_required
+def follow(username):
+    # Get info from the database about the user to follow
+    user = User.query.filter_by(username=username).first()
+    # Case, if there is no such a user
+    if user is None:
+        # Error message
+        flash('User {} not found.'.format(username))
+        return redirect(url_for('index'))
+    # Prevent from following himself
+    if user == current_user:
+        flash('You cannot follow yourself!')
+        return redirect(url_for('user', username=username))
+    # Follow the chosen user
+    current_user.follow(user)
+    # Commit changes to the database
+    db.session.commit()
+    flash('You are following {}!'.format(username))
+    return redirect(url_for('user', username=username))
+
+@app.route('/unfollow/<username>')
+@login_required
+def unfollow(username):
+    # Get info about the user from database
+    user = User.query.filter_by(username=username).first()
+    # Case, is there is no such a user to unfollow
+    if user is None:
+        # Error message
+        flash('User {} not found.'.format(username))
+        return redirect(url_for('index'))
+    # Prevent from unfollowing himself
+    if user == current_user:
+        flash('You cannot unfollow yourself!')
+        return redirect(url_for('user', username=username))
+    # Unfollow the chosen user
+    current_user.unfollow(user)
+    # Commit changes to the database
+    db.session.commit()
+    # A message of confirmation
+    flash('You are not following {}.'.format(username))
+    return redirect(url_for('user', username=username))
+
+
+@app.route('/explore')
+@login_required
+def explore():
+    # Get the first page
+    page = request.args.get('page', 1, type=int)
+    # Posts should have descending order, depending on timestamp
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+                        page, app.config['POSTS_PER_PAGE'], False)
+    # Go to next page
+    next_url = url_for('explore', page=posts.next_num) if posts.has_next else None
+    # Go to the previous page
+    prev_url = url_for('explore', page=posts.prev_num) if posts.has_prev else None
+    return render_template("index.html", title='Explore', posts=posts.items, next_url=next_url, prev_url=prev_url)

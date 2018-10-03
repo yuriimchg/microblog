@@ -20,3 +20,6 @@ class Config:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     # Address of administrator
     ADMINS = ['']
+
+    # How many posts per page should be displayed?
+    POSTS_PER_PAGE = 2

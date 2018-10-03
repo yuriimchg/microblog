@@ -8,6 +8,7 @@ import logging
 # Send email notifications about errors with SMTPHandler
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
+from flask_bootstrap import Bootstrap
 
 # Create an instanсe of a flask application
 app = Flask(__name__)
@@ -25,6 +26,9 @@ db = SQLAlchemy(app)
 
 # Create an instance of the database migration
 migrate = Migrate(app,db)
+
+# Send e-mails to users
+bootstrap = Bootstrap(app)
 
 # In case of disabled debug mode
 if not app.debug:
