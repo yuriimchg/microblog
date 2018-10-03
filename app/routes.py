@@ -117,7 +117,7 @@ def user(username):
 @login_required
 def edit_profile():
     # Get the form to change the profile information
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username)
     # Change profile information on submit
     if form.validate_on_submit():
         # Change nickname

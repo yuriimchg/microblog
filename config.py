@@ -11,3 +11,12 @@ class Config:
             'sqlite:///' + os.path.join(basedir, 'app.db')
     # Turn off notifications on changes into the database
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Mail credentials to receive notifications about errors on the server
+    MAIL_SERVER = os.environ.get("MAIL_SERVER")
+    MAIL_PORT = os.environ.get("MAIL_PORT")
+    MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS")
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
+    # Address of administrator
+    ADMINS = ['']
