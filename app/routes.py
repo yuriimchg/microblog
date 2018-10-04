@@ -66,7 +66,7 @@ def login():
         if not next_page or url_parse(next_page).netloc != '':
             # Let 'index' be the next page
             next_page = url_for('index')
-        return redirect(url_for('index'))
+        return redirect(next_page)
     # Case of wrong login / password
     return render_template('login.html',
                             title='Sign In',

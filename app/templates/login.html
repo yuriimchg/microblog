@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-
+{% import 'bootstrap/wtf.html' as wtf %}
 {% block content %}
-  <h1>
+  <h1 class="col-lg-8 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
     Sign In into account!
   </h1>
-  <form action="" method="post" novalidate>
+<!--  <form action="" method="post" novalidate>
     <!-- Creates hidden field containing token to prevent
-    the form being under CSRF  -->
+    the form being under CSRF  --#>
     {{ form.hidden_tag() }}
-    <!-- Go through login and password   -->
+    <!-- Go through login and password   --#>
     <p>
       {{ form.username.label }}
       {% for error in form.username.errors %}
@@ -35,8 +35,15 @@
       {{ form.submit() }}
     </p>
   </form>
-      <p>
-         New User?
-       <a href="{{ url_for('register') }}"> Click to Register! </a>
-     </p>
+-->
+      <div class="col-lg-8 col-lg-offset-4 col-md-6 col-md-offset-3 col-xs-12">
+        <div class="col-md-3">
+          {{ wtf.quick_form(form) }}
+        </div>
+
+        <div class="col-lg-12 col-md-3 col-xs-2">
+          New User?
+          <a href="{{ url_for('register') }}"> Click to Register! </a>
+        </div>
+      </div>
 {% endblock %}
